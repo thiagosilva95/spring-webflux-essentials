@@ -9,12 +9,15 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.*;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.Optional;
+
+import static org.springframework.boot.web.error.ErrorAttributeOptions.*;
 
 @Component
 @Order(-2)
@@ -34,12 +37,17 @@ public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
     }
 
     private Mono<ServerResponse> formatErrorResponse(ServerRequest request) {
-        Map<String, Object> errorAttributesMap = getErrorAttributes(request, ErrorAttributeOptions.defaults());
+        String query = request.uri().getQuery();
+        ErrorAttributeOptions errorAttributeOptions = isTraceEnable(query) ? of(Include.STACK_TRACE) : defaults();
+        Map<String, Object> errorAttributesMap = getErrorAttributes(request, errorAttributeOptions);
         int status = (int) Optional.ofNullable(errorAttributesMap.get("status")).orElse(500);
-
 
         return ServerResponse.status(status)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(errorAttributesMap));
+    }
+
+    private boolean isTraceEnable(String query) {
+        return !StringUtils.isEmpty(query) && query.contains("trace=true");
     }
 }
