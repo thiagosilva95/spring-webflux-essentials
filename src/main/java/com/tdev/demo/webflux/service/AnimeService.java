@@ -31,4 +31,11 @@ public class AnimeService {
     public Mono<Anime> save(Anime anime) {
         return animeRepository.save(anime);
     }
+
+    public Mono<Void> update(Anime anime) {
+        return findById(anime.getId())
+                .map(animeFound -> anime.withId(animeFound.getId()))
+                .flatMap(animeRepository::save)
+                .thenEmpty(Mono.empty());
+    }
 }

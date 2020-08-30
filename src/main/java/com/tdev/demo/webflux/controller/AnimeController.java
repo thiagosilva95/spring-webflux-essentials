@@ -35,4 +35,10 @@ public class AnimeController {
         return animeService.save(anime);
     }
 
+    @PutMapping
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public Mono<Void> update(@Valid @RequestBody Anime anime) {
+        return animeService.update(anime);
+    }
+
 }
