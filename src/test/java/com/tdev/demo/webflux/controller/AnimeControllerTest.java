@@ -44,15 +44,15 @@ class AnimeControllerTest {
 
         BDDMockito.when(animeServiceMock.findById(ArgumentMatchers.anyInt()))
                 .thenReturn(Mono.just(anime));
-//
-//        BDDMockito.when(animeRepositoryMock.save(AnimeCreator.createAnimeToBeSaved()))
-//                .thenReturn(Mono.just(anime));
-//
-//        BDDMockito.when(animeRepositoryMock.delete(ArgumentMatchers.any(Anime.class)))
-//                .thenReturn(Mono.empty());
-//
-//        BDDMockito.when(animeRepositoryMock.save(AnimeCreator.createValidAnime()))
-//                .thenReturn(Mono.just(anime));
+
+        BDDMockito.when(animeServiceMock.save(AnimeCreator.createAnimeToBeSaved()))
+                .thenReturn(Mono.just(anime));
+
+        BDDMockito.when(animeServiceMock.delete(ArgumentMatchers.anyInt()))
+                .thenReturn(Mono.empty());
+
+        BDDMockito.when(animeServiceMock.update(AnimeCreator.createValidAnime()))
+                .thenReturn(Mono.empty());
     }
 
     @Test
@@ -88,6 +88,36 @@ class AnimeControllerTest {
                 .create(animeController.findById(1))
                 .expectSubscription()
                 .expectNext(anime)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("save creates an anime when successful")
+    public void save_CreatesAnime_WhenSuccessful() {
+        Anime animeToBeSaved = AnimeCreator.createAnimeToBeSaved();
+
+        StepVerifier
+                .create(animeController.save(animeToBeSaved))
+                .expectSubscription()
+                .expectNext(anime)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("delete removes the anime when successful")
+    public void delete_RemovesAnime_WhenSuccessful() {
+        StepVerifier
+                .create(animeController.delete(1))
+                .expectSubscription()
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("update save updated anime and returns empty mono when successful")
+    public void update_SaveUpdatedAnime_WhenSuccessful() {
+        StepVerifier
+                .create(animeController.update(1, AnimeCreator.createValidAnime()))
+                .expectSubscription()
                 .verifyComplete();
     }
 
