@@ -5,6 +5,7 @@ import com.tdev.demo.webflux.service.AnimeService;
 import com.tdev.demo.webflux.util.AnimeCreator;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -12,6 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.blockhound.BlockHound;
 import reactor.blockhound.BlockingOperationError;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
@@ -40,8 +42,8 @@ class AnimeControllerTest {
         BDDMockito.when(animeServiceMock.findAll())
                 .thenReturn(Flux.just(anime));
 
-//        BDDMockito.when(animeRepositoryMock.findById(ArgumentMatchers.anyInt()))
-//                .thenReturn(Mono.just(anime));
+        BDDMockito.when(animeServiceMock.findById(ArgumentMatchers.anyInt()))
+                .thenReturn(Mono.just(anime));
 //
 //        BDDMockito.when(animeRepositoryMock.save(AnimeCreator.createAnimeToBeSaved()))
 //                .thenReturn(Mono.just(anime));
@@ -74,6 +76,16 @@ class AnimeControllerTest {
     public void findAll_ReturnsFluxOfAnime_WhenSuccessful() {
         StepVerifier
                 .create(animeServiceMock.findAll())
+                .expectSubscription()
+                .expectNext(anime)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("findById returns Mono of anime when it exists")
+    public void findById_ReturnsMonoAnime_WhenSuccessful() {
+        StepVerifier
+                .create(animeController.findById(1))
                 .expectSubscription()
                 .expectNext(anime)
                 .verifyComplete();
