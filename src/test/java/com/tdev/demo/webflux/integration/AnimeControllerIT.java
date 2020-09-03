@@ -6,6 +6,7 @@ import com.tdev.demo.webflux.service.AnimeService;
 import com.tdev.demo.webflux.util.AnimeCreator;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -47,17 +48,17 @@ public class AnimeControllerIT {
         BDDMockito.when(animeRepositoryMock.findAll())
                 .thenReturn(Flux.just(anime));
 
-//        BDDMockito.when(animeServiceMock.findById(ArgumentMatchers.anyInt()))
-//                .thenReturn(Mono.just(anime));
-//
+        BDDMockito.when(animeRepositoryMock.findById(ArgumentMatchers.anyInt()))
+                .thenReturn(Mono.just(anime));
+
         BDDMockito.when(animeRepositoryMock.save(AnimeCreator.createAnimeToBeSaved()))
                 .thenReturn(Mono.just(anime));
-//
-//        BDDMockito.when(animeServiceMock.delete(ArgumentMatchers.anyInt()))
-//                .thenReturn(Mono.empty());
-//
-//        BDDMockito.when(animeServiceMock.update(AnimeCreator.createValidAnime()))
-//                .thenReturn(Mono.empty());
+
+        BDDMockito.when(animeRepositoryMock.delete(ArgumentMatchers.any(Anime.class)))
+                .thenReturn(Mono.empty());
+
+        BDDMockito.when(animeRepositoryMock.save(AnimeCreator.createValidAnime()))
+                .thenReturn(Mono.empty());
     }
 
     @Test
@@ -133,5 +134,57 @@ public class AnimeControllerIT {
                 .jsonPath("$.status").isEqualTo(400);
     }
 
+    @Test
+    @DisplayName("delete removes the anime when successful")
+    public void delete_RemovesAnime_WhenSuccessful() {
+        testClient
+                .delete()
+                .uri("/animes/{id}", 1)
+                .exchange()
+                .expectStatus().isNoContent();
+    }
 
+    @Test
+    @DisplayName("delete removes the anime when successful")
+    public void delete_RemovesMonoError_WhenEmptyMonoIsReturned() {
+        BDDMockito.when(animeRepositoryMock.findById(ArgumentMatchers.anyInt()))
+                .thenReturn(Mono.empty());
+
+        testClient
+                .delete()
+                .uri("/animes/{id}", 1)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(404);
+    }
+
+    @Test
+    @DisplayName("update save updated anime and returns empty mono when successful")
+    public void update_SaveUpdatedAnime_WhenSuccessful() {
+        testClient
+                .put()
+                .uri("/animes/{id}",1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(anime))
+                .exchange()
+                .expectStatus().isNoContent();
+    }
+
+    @Test
+    @DisplayName("update removes the anime when successful")
+    public void update_RemovesMonoError_WhenEmptyMonoIsReturned() {
+        BDDMockito.when(animeRepositoryMock.findById(ArgumentMatchers.anyInt()))
+                .thenReturn(Mono.empty());
+
+        testClient
+                .put()
+                .uri("/animes/{id}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(anime))
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(404);
+    }
 }
