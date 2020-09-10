@@ -134,15 +134,20 @@ class AnimeServiceTest {
     }
 
     @Test
-    @DisplayName("saveAll creates a list of anime when successful")
-    public void saveAll_CreatesListOfAnimes_WhenSuccessful() {
+    @DisplayName("saveAll returns Mono error when one of the objects in the list contains no or empty name")
+    public void saveAll_ReturnsMonoError_WhenContainsInvalidName() {
         Anime animeToBeSaved = AnimeCreator.createAnimeToBeSaved();
 
+        BDDMockito.when(animeRepositoryMock
+                .saveAll(ArgumentMatchers.anyIterable()))
+                .thenReturn(Flux.just(anime, anime.withName("")));
+
         StepVerifier
-                .create(animeService.saveAll(List.of(animeToBeSaved, animeToBeSaved)))
+                .create(animeService.saveAll(List.of(animeToBeSaved, animeToBeSaved.withName(""))))
                 .expectSubscription()
-                .expectNext(anime, anime)
-                .verifyComplete();
+                .expectNext(anime)
+                .expectError(ResponseStatusException.class)
+                .verify();
     }
 
     @Test
