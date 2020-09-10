@@ -22,6 +22,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.List;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
@@ -53,6 +54,10 @@ public class AnimeControllerIT {
 
         BDDMockito.when(animeRepositoryMock.save(AnimeCreator.createAnimeToBeSaved()))
                 .thenReturn(Mono.just(anime));
+
+        BDDMockito.when(animeRepositoryMock
+                .saveAll(List.of(AnimeCreator.createAnimeToBeSaved(), AnimeCreator.createAnimeToBeSaved())))
+                .thenReturn(Flux.just(anime, anime));
 
         BDDMockito.when(animeRepositoryMock.delete(ArgumentMatchers.any(Anime.class)))
                 .thenReturn(Mono.empty());
@@ -117,6 +122,22 @@ public class AnimeControllerIT {
                 .expectStatus().isCreated()
                 .expectBody(Anime.class)
                 .isEqualTo(anime);
+    }
+
+    @Test
+    @DisplayName("saveBatch creates a list of anime when successful")
+    public void saveBatch_CreatesListOfAnimes_WhenSuccessful() {
+        Anime animeToBeSaved = AnimeCreator.createAnimeToBeSaved();
+        testClient
+                .post()
+                .uri("/animes/batch")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(List.of(animeToBeSaved, animeToBeSaved)))
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBodyList(Anime.class)
+                .hasSize(2)
+                .contains(anime);
     }
 
     @Test
