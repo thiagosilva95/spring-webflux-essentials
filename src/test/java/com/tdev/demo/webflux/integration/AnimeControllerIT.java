@@ -2,16 +2,15 @@ package com.tdev.demo.webflux.integration;
 
 import com.tdev.demo.webflux.domain.Anime;
 import com.tdev.demo.webflux.repository.AnimeRepository;
-import com.tdev.demo.webflux.service.AnimeService;
 import com.tdev.demo.webflux.util.AnimeCreator;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -27,8 +26,9 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 @ExtendWith(SpringExtension.class)
-@WebFluxTest
-@Import(AnimeService.class)
+@SpringBootTest
+//@Import(AnimeService.class)
+@AutoConfigureWebTestClient
 public class AnimeControllerIT {
 
     @MockBean
