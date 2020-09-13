@@ -1,4 +1,4 @@
-package com.tdev.demo.webflux.exceotion;
+package com.tdev.demo.webflux.exception;
 
 import org.springframework.boot.autoconfigure.web.ResourceProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
