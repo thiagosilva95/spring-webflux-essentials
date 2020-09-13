@@ -94,9 +94,18 @@ public class AnimeControllerIT {
     }
 
     @Test
-    @DisplayName("findAll returns a flux of anime")
+    @DisplayName("findAll returns forbidden when user is not authenticated")
+    public void findAll_ReturnsUnauthorized_WhenUserIsNotAuthenticated() {
+        testClientInvalid
+                .get()
+                .uri("/animes")
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+    
+    @DisplayName("findAll returns a flux of anime when user is successfully authenticated and has role ADMIN ")
     public void findAll_ReturnsFluxOfAnime_WhenSuccessful() {
-        testClientUser
+        testClientAdmin
                 .get()
                 .uri("/animes")
                 .exchange()
